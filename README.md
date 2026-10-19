@@ -8,3 +8,5 @@ le projet doit comporter :
 
 4 séance de 4 heure sont mis à disposition
 
+Pour lancer le site en local --> faite play sur le fichier python app.py pour que le site soit accessible. 
+http://127.0.0.1:5000

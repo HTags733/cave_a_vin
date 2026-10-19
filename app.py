@@ -2,10 +2,15 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+import datetime
 
 app = Flask(__name__)
 app.secret_key = 'macave_secret_key_session'
 DB_NAME = 'macave.db'
+
+#
+# Partie BDD du projet
+#
 
 def get_db():
     conn = sqlite3.connect(DB_NAME)
@@ -79,11 +84,21 @@ def init_db():
         conn.commit()
         conn.close()
 
+
+#
+# Partie WEB du projet
+#
+
+
+# Route par défaut au lancement de l'application
 @app.route('/')
 def index():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     return render_template('login.html')
+
+
+# Méthode GET et POST pour constituer le formulaire d'enregistrement dans la BDD
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -93,7 +108,7 @@ def register():
         password = request.form['password']
         
         if not username or not email or not password:
-            flash("Tous les champs sont obligatoires.", "danger")
+            flash("Tous les champs sont obligatoires.", "danger") # Commande permettant d'afficher un message dans un champs + danger qui rajoute la couleur Rouge
             return redirect(url_for('register'))
             
         hashed_pw = generate_password_hash(password)
@@ -112,6 +127,9 @@ def register():
         finally:
             conn.close()
     return render_template('register.html')
+
+
+# Formulaire d'authentification à un compte existant dans la BDD pour acceder à sa propre Cave
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -132,10 +150,14 @@ def login():
         flash("Identifiants incorrects.", "danger")
         return redirect(url_for('index'))
 
+
+# Méthode de déconnexion 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
+
+
 
 @app.route('/dashboard')
 def dashboard():
@@ -189,6 +211,8 @@ def dashboard():
                            capacite_totale=capacite_totale,
                            occupation_globale=round(occupation_globale, 1))
 
+
+# Formulaire pour ajouter une étagère 
 @app.route('/etagere/add', methods=['POST'])
 def add_etagere():
     if 'user_id' not in session:
@@ -219,6 +243,7 @@ def add_etagere():
     flash("Étagère ajoutée avec succès.", "success")
     return redirect(url_for('dashboard'))
 
+# formulaire de suspression d'une étagère
 @app.route('/etagere/delete/<int:etagere_id>', methods=['POST'])
 def delete_etagere(etagere_id):
     if 'user_id' not in session:
@@ -226,6 +251,8 @@ def delete_etagere(etagere_id):
         
     conn = get_db()
     cursor = conn.cursor()
+
+
     # Vérification si l'étagère contient des bouteilles en stock
     cursor.execute("SELECT COUNT(*) as nb FROM bouteille WHERE etagere_id = ? AND statut = 'stock'", (etagere_id,))
     if cursor.fetchone()['nb'] > 0:
@@ -246,6 +273,7 @@ def catalog():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM vin_ref")
     vins = cursor.fetchall()
+
     
     # Récupérer les étagères de l'utilisateur pour le formulaire d'ajout
     cursor.execute("SELECT id FROM cave WHERE utilisateur_id = ?", (session['user_id'],))
@@ -258,6 +286,8 @@ def catalog():
     conn.close()
     return render_template('catalog.html', vins=vins, etageres=etageres)
 
+
+# Formulaire d'ajout de Vin
 @app.route('/vin/add', methods=['POST'])
 def add_vin_and_bouteilles():
     if 'user_id' not in session:
@@ -280,6 +310,8 @@ def add_vin_and_bouteilles():
         
     conn = get_db()
     cursor = conn.cursor()
+
+
     
     # Vérification de la capacité de l'étagère de destination
     cursor.execute("""
@@ -291,6 +323,8 @@ def add_vin_and_bouteilles():
         flash("Capacité de l'étagère insuffisante pour cet ajout !", "danger")
         conn.close()
         return redirect(url_for('catalog'))
+
+
         
     # Vérification ou création de la référence (unicité par domaine, nom, type, millesime, region)
     cursor.execute("""
@@ -306,9 +340,9 @@ def add_vin_and_bouteilles():
             VALUES (?, ?, ?, ?, ?, ?)
         """, (domaine, nom, type_vin, millesime, region, description))
         vin_id = cursor.lastrowid
+
         
-    # Ajout atomique des bouteilles
-    import datetime
+    # Ajout Horaire des bouteilles
     date_auj = datetime.date.today().isoformat()
     for _ in range(quantite):
         cursor.execute("""

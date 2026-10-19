@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram name="Page-1" id="N3edQk9H0Be3S_kIUjJ7">
-    <mxGraphModel dx="1945" dy="830" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1312" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -65,7 +65,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="vpe3BUNKZJjNbKTmPSNb-16" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="Vin Ref" vertex="1">
-          <mxGeometry height="234" width="140" x="120" y="480" as="geometry" />
+          <mxGeometry height="208" width="140" x="120" y="480" as="geometry" />
         </mxCell>
         <mxCell id="vpe3BUNKZJjNbKTmPSNb-17" parent="vpe3BUNKZJjNbKTmPSNb-16" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ id: int" vertex="1">
           <mxGeometry height="26" width="140" y="26" as="geometry" />
@@ -87,9 +87,6 @@
         </mxCell>
         <mxCell id="vpe3BUNKZJjNbKTmPSNb-23" parent="vpe3BUNKZJjNbKTmPSNb-16" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ description: str" vertex="1">
           <mxGeometry height="26" width="140" y="182" as="geometry" />
-        </mxCell>
-        <mxCell id="vpe3BUNKZJjNbKTmPSNb-24" parent="vpe3BUNKZJjNbKTmPSNb-16" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="+ note_moyenne: float" vertex="1">
-          <mxGeometry height="26" width="140" y="208" as="geometry" />
         </mxCell>
         <mxCell id="vpe3BUNKZJjNbKTmPSNb-47" edge="1" parent="1" source="vpe3BUNKZJjNbKTmPSNb-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="vpe3BUNKZJjNbKTmPSNb-33">
           <mxGeometry relative="1" as="geometry" />
