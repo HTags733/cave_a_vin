@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>MaCave - Gestion de Cave</title>
+    <style>
+        body { background-color: #121212; color: #dcdcdc; font-family: monospace; margin: 0; padding: 0; }
+        nav { background: #1a1a1a; padding: 15px 30px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        nav a { color: #c5a059; text-decoration: none; margin-right: 20px; font-weight: bold; }
+        nav a:hover { color: #f3e5ab; }
+        .container { padding: 30px; max-width: 1000px; margin: auto; }
+        .flash { background: #2d221e; border-left: 4px solid #c5a059; padding: 10px; margin-bottom: 20px; color: #f3e5ab; }
+        .card { background: #1e1e1e; border: 1px solid #333; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #333; padding: 10px; text-align: left; }
+        th { background: #262626; color: #c5a059; }
+        input, select, textarea { background: #252525; border: 1px solid #444; color: #fff; padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { background: #c5a059; color: #121212; border: none; padding: 8px 15px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #d4af37; }
+        .btn-danger { background: #a94442; color: #fff; }
+        .btn-danger:hover { background: #c9302c; }
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: #1e1e1e; border: 1px solid #333; padding: 15px; text-align: center; border-radius: 4px; }
+        .stat-val { font-size: 1.4em; color: #c5a059; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div>
+            <a href="/dashboard">Tableau de bord</a>
+            <a href="/catalog">Catalogue & Ajout</a>
+            <a href="/stock">Mon Stock</a>
+            <a href="/historique">Historique</a>
+            <a href="/communaute">Communauté</a>
+        </div>
+        <div>
+            <span style="color:#888; margin-right: 15px;">{{ session['username'] }}</span>
+            <a href="/logout" style="color: #ff6b6b;">Déconnexion</a>
+        </div>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

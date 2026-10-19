@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Espace Communautaire - Notes et Avis</h2>
+
+<div class="card">
+    <table>
+        <tr><th>Vin (Référence)</th><th>Région / Type / Millésime</th><th>Note Communautaire Moyenne</th></tr>
+        {% for v in vins %}
+        <tr>
+            <td>
+                <strong>{{ v.domaine }} - {{ v.nom }}</strong><br>
+                <small style="color:#aaa;">{{ v.description }}</small>
+            </td>
+            <td>{{ v.type }} ({{ v.millesime }}), {{ v.region }}</td>
+            <td>
+                {% if v.moyenne %}
+                    <span style="font-size: 1.2em; color: #c5a059; font-weight:bold;">{{ "%.2f"|format(v.moyenne) }} / 20</span>
+                    <br><small>({{ v.nb_evas }} évaluation(s))</small>
+                {% else %}
+                    <span style="color: #888;">Non évalué</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" style="background: #151515; padding: 10px 20px;">
+                <div style="font-size: 0.9em; color: #aaa; margin-bottom: 5px;">Avis de la communauté pour cette référence :</div>
+                <ul style="margin: 0; padding-left: 20px;">
+                    {% for ev in evaluations_dict[v.id] %}
+                        <li style="margin-bottom: 4px;">
+                            <strong>{{ ev.username }}</strong> : <span style="color:#c5a059;">{{ ev.note }}/20</span> 
+                            {% if ev.commentaire %} - "{{ ev.commentaire }}"{% endif %}
+                        </li>
+                    {% else %}
+                        <li style="color: #666; list-style: none;">Aucun avis partagé pour l'instant.</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

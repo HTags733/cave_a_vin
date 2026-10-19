@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Tableau de bord personnel</h2>
+
+<div class="stats-grid">
+    <div class="stat-box"><div>Bouteilles en stock</div><div class="stat-val">{{ nb_bouteilles }}</div></div>
+    <div class="stat-box"><div>Références distinctes</div><div class="stat-val">{{ nb_references }}</div></div>
+    <div class="stat-box"><div>Étagères</div><div class="stat-val">{{ etageres|length }}</div></div>
+    <div class="stat-box"><div>Occupation globale</div><div class="stat-val">{{ occupation_globale }}%</div></div>
+    <div class="stat-box"><div>Valeur du stock</div><div class="stat-val">{{ valeur_stock }} €</div></div>
+</div>
+
+<div class="card">
+    <h3>Ajouter une nouvelle étagère</h3>
+    <form method="POST" action="/etagere/add" style="display:flex; gap:10px;">
+        <input type="text" name="nom" placeholder="Nom de l'étagère" required style="flex:2;">
+        <input type="number" name="capacite" placeholder="Capacité maximale" min="1" required style="flex:1;">
+        <button type="submit" style="flex:1;">Créer l'étagère</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Gestion de vos étagères</h3>
+    <table>
+        <tr><th>Nom</th><th>Capacité Max</th><th>Occupation actuelle</th><th>Action</th></tr>
+        {% for etag in etageres %}
+        <tr>
+            <td>{{ etag.nom }}</td>
+            <td>{{ etag.capacite }}</td>
+            <td>{{ etag.occupation }} / {{ etag.capacite }}</td>
+            <td>
+                <form method="POST" action="/etagere/delete/{{ etag.id }}" onsubmit="return confirm('Supprimer cette étagère ?');" style="margin:0;">
+                    <button type="submit" class="btn-danger">Supprimer</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="text-align:center; color:#777;">Aucune étagère enregistrée.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

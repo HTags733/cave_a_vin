@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Historique des Dégustations (Bouteilles Archivées)</h2>
+
+<div class="card">
+    <table>
+        <tr><th>Domaine</th><th>Nom</th><th>Millésime</th><th>Note Personnelle</th><th>Commentaire</th></tr>
+        {% for a in archives %}
+        <tr>
+            <td>{{ a.domaine }}</td>
+            <td>{{ a.nom }}</td>
+            <td>{{ a.millesime }}</td>
+            <td><strong>{{ a.note }} / 20</strong></td>
+            <td>{{ a.commentaire if a.commentaire else '-' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center; color:#777;">Aucune bouteille archivée pour l'instant.</td></tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
