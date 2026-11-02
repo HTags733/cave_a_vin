@@ -12,12 +12,12 @@ DB_NAME = 'macave.db'
 # Partie BDD du projet
 #
 
-def get_db():
+def get_db(): # Récupération de la base de donnée
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     return conn
 
-def init_db():
+def init_db(): # Initialiser les classes avec les paramètres 
     if not os.path.exists(DB_NAME):
         conn = get_db()
         cursor = conn.cursor()
@@ -67,7 +67,7 @@ def init_db():
                 FOREIGN KEY(vin_id) REFERENCES vin_ref(id),
                 FOREIGN KEY(etagere_id) REFERENCES etagere(id)
             )
-        ''')
+        ''') # -- 'stock' ou 'archive' cette ligne veut dire que les 2 valeurs attendu sont Stock et archive 
         cursor.execute('''
             CREATE TABLE evaluation (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,7 +75,7 @@ def init_db():
                 commentaire TEXT,
                 auteur_id INTEGER NOT NULL,
                 vin_id INTEGER NOT NULL,
-                bouteille_id INTEGER UNIQUE NOT NULL,
+                bouteille_id INTEGER, -- Devient NULL pour les avis directs sans bouteille physique
                 FOREIGN KEY(auteur_id) REFERENCES utilisateur(id),
                 FOREIGN KEY(vin_id) REFERENCES vin_ref(id),
                 FOREIGN KEY(bouteille_id) REFERENCES bouteille(id)
@@ -103,7 +103,7 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username'].strip()
+        username = request.form['username'].strip() # methode .strip permettant de supprimé les espaces et caractères blancs au début et à la fin d'une chaîne de caractères
         email = request.form['email'].strip()
         password = request.form['password']
         
@@ -111,9 +111,9 @@ def register():
             flash("Tous les champs sont obligatoires.", "danger") # Commande permettant d'afficher un message dans un champs + danger qui rajoute la couleur Rouge
             return redirect(url_for('register'))
             
-        hashed_pw = generate_password_hash(password)
+        hashed_pw = generate_password_hash(password) # Hashage du mot de passe porur plus de sécurité
         conn = get_db()
-        try:
+        try: # Try fonctionne sur une base de capture d'exception possible commis par l'utilisateur
             cursor = conn.cursor()
             cursor.execute("INSERT INTO utilisateur (username, email, password_hash) VALUES (?, ?, ?)",
                            (username, email, hashed_pw))
@@ -122,15 +122,14 @@ def register():
             conn.commit()
             flash("Compte créé avec succès. Veuillez vous connecter.", "success")
             return redirect(url_for('index'))
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError: # ici on dit que on n'eesaye pas de rajouter un utilisateur deja existant
             flash("Nom d'utilisateur ou email déjà existant.", "danger")
         finally:
             conn.close()
     return render_template('register.html')
 
 
-# Formulaire d'authentification à un compte existant dans la BDD pour acceder à sa propre Cave
-
+# Formulaire d'authentification à un compte existant dans la BDD pour accéder à sa propre Cave
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username'].strip()
@@ -139,7 +138,7 @@ def login():
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM utilisateur WHERE username = ?", (username,))
-    user = cursor.fetchone()
+    user = cursor.fetchone() # prendre le premier utilisateur
     conn.close()
     
     if user and check_password_hash(user['password_hash'], password):
@@ -160,7 +159,7 @@ def logout():
 
 
 @app.route('/dashboard')
-def dashboard():
+def dashboard(): # onglet dashboard pour un visuel dynamique de la cave et son contenue
     if 'user_id' not in session:
         return redirect(url_for('index'))
     
@@ -355,6 +354,9 @@ def add_vin_and_bouteilles():
     flash(f"{quantite} bouteille(s) ajoutée(s) avec succès.", "success")
     return redirect(url_for('catalog'))
 
+
+
+# Fonction du stock de l'étagère
 @app.route('/stock')
 def stock():
     if 'user_id' not in session:
@@ -383,6 +385,8 @@ def stock():
     conn.close()
     return render_template('stock.html', bouteilles=bouteilles, etageres=etageres)
 
+
+
 @app.route('/bouteille/deplacer/<int:bouteille_id>', methods=['POST'])
 def deplacer_bouteille(bouteille_id):
     if 'user_id' not in session:
@@ -409,6 +413,7 @@ def deplacer_bouteille(bouteille_id):
         
     conn.close()
     return redirect(url_for('stock'))
+
 
 @app.route('/bouteille/retirer/<int:bouteille_id>', methods=['POST'])
 def retirer_bouteille(bouteille_id):
@@ -507,6 +512,63 @@ def communaute():
         
     conn.close()
     return render_template('communaute.html', vins=vins, evaluations_dict=evaluations_dict)
+
+# Route pour permettre à n'importe quel utilisateur d'évaluer un vin du catalogue/communauté
+@app.route('/vin/evaluer/<int:vin_id>', methods=['POST'])
+def evaluer_vin_communaute(vin_id):
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+
+    note = request.form.get('note', type=int)
+    commentaire = request.form.get('commentaire', '').strip()
+
+    if note is None or not (0 <= note <= 20):
+        flash("La note doit être un entier compris entre 0 et 20.", "danger")
+        return redirect(url_for('communaute'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Vérification de l'existence du vin
+    cursor.execute("SELECT id FROM vin_ref WHERE id = ?", (vin_id,))
+    if not cursor.fetchone():
+        flash("Référence de vin introuvable.", "danger")
+        conn.close()
+        return redirect(url_for('communaute'))
+
+    # Insertion de l'évaluation sans bouteille_id (avis direct)
+    cursor.execute("""
+        INSERT INTO evaluation (note, commentaire, auteur_id, vin_id, bouteille_id)
+        VALUES (?, ?, ?, ?, NULL)
+    """, (note, commentaire, session['user_id'], vin_id))
+
+    conn.commit()
+    conn.close()
+
+    flash("Votre avis a été publié dans la communauté.", "success")
+    return redirect(url_for('communaute'))
+
+
+# Fonction pour supprimer son propre avis
+@app.route('/evaluation/supprimer/<int:eval_id>', methods=['POST'])
+def supprimer_evaluation(eval_id):
+    if 'user_id' not in session:
+        return redirect(url_for('index'))
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Seul l'auteur de l'évaluation a le droit de la supprimer
+    cursor.execute("DELETE FROM evaluation WHERE id = ? AND auteur_id = ?", (eval_id, session['user_id']))
+    
+    if cursor.rowcount > 0:
+        flash("Avis supprimé avec succès.", "success")
+    else:
+        flash("Action non autorisée ou avis inexistant.", "danger")
+
+    conn.commit()
+    conn.close()
+    return redirect(url_for('communaute'))
 
 if __name__ == '__main__':
     init_db()

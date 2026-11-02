@@ -1,42 +1,59 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Espace Communautaire - Notes et Avis</h2>
+<div class="container mt-4">
+    <h1 class="mb-4">Espace Communauté</h1>
 
-<div class="card">
-    <table>
-        <tr><th>Vin (Référence)</th><th>Région / Type / Millésime</th><th>Note Communautaire Moyenne</th></tr>
-        {% for v in vins %}
-        <tr>
-            <td>
-                <strong>{{ v.domaine }} - {{ v.nom }}</strong><br>
-                <small style="color:#aaa;">{{ v.description }}</small>
-            </td>
-            <td>{{ v.type }} ({{ v.millesime }}), {{ v.region }}</td>
-            <td>
-                {% if v.moyenne %}
-                    <span style="font-size: 1.2em; color: #c5a059; font-weight:bold;">{{ "%.2f"|format(v.moyenne) }} / 20</span>
-                    <br><small>({{ v.nb_evas }} évaluation(s))</small>
+    {% for vin in vins %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="m-0">{{ vin.domaine }} - {{ vin.nom }} ({{ vin.millesime }})</h5>
+            <span class="badge bg-primary fs-6">
+                Moyenne : {{ "%.1f"|format(vin.moyenne) if vin.moyenne else "N/A" }} / 20 
+                ({{ vin.nb_evas }} avis)
+            </span>
+        </div>
+        <div class="card-body">
+            <p><strong>Région :</strong> {{ vin.region }} | <strong>Type :</strong> {{ vin.type }}</p>
+            <p>{{ vin.description }}</p>
+
+            <h6>Avis des membres :</h6>
+            <ul class="list-group list-group-flush mb-3">
+                {% for eva in evaluations_dict[vin.id] %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>{{ eva.username }}</strong> — <span class="text-warning">{{ eva.note }}/20</span>
+                        <p class="mb-0 text-muted">{{ eva.commentaire }}</p>
+                    </div>
+                    {% if eva.auteur_id == session['user_id'] %}
+                    <form action="{{ url_for('supprimer_evaluation', eval_id=eva.id) }}" method="POST">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Supprimer</button>
+                    </form>
+                    {% endif %}
+                </li>
                 {% else %}
-                    <span style="color: #888;">Non évalué</span>
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3" style="background: #151515; padding: 10px 20px;">
-                <div style="font-size: 0.9em; color: #aaa; margin-bottom: 5px;">Avis de la communauté pour cette référence :</div>
-                <ul style="margin: 0; padding-left: 20px;">
-                    {% for ev in evaluations_dict[v.id] %}
-                        <li style="margin-bottom: 4px;">
-                            <strong>{{ ev.username }}</strong> : <span style="color:#c5a059;">{{ ev.note }}/20</span> 
-                            {% if ev.commentaire %} - "{{ ev.commentaire }}"{% endif %}
-                        </li>
-                    {% else %}
-                        <li style="color: #666; list-style: none;">Aucun avis partagé pour l'instant.</li>
-                    {% endfor %}
-                </ul>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+                <li class="list-group-item text-muted">Aucun avis déposé pour le moment.</li>
+                {% endfor %}
+            </ul>
+
+            <!-- Formulaire d'ajout d'avis -->
+            <div class="card card-body bg-light">
+                <h6>Donner votre avis sur ce vin :</h6>
+                <form action="{{ url_for('evaluer_vin_communaute', vin_id=vin.id) }}" method="POST">
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <input type="number" name="note" class="form-control" min="0" max="20" placeholder="Note / 20" required>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" name="commentaire" class="form-control" placeholder="Votre commentaire..." required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-success w-100">Publier</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}
