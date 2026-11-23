@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import datetime
 
+
 app = Flask(__name__)
 app.secret_key = 'macave_secret_key_session'
 DB_NAME = 'macave.db'
@@ -67,7 +68,7 @@ def init_db(): # Initialiser les classes avec les paramètres
                 FOREIGN KEY(vin_id) REFERENCES vin_ref(id),
                 FOREIGN KEY(etagere_id) REFERENCES etagere(id)
             )
-        ''') # -- 'stock' ou 'archive' cette ligne veut dire que les 2 valeurs attendu sont Stock et archive 
+        ''') # -- 'stock' ou 'archive' cette ligne veut dire que les 2 valeurs attendu sont stock ou archive 
         cursor.execute('''
             CREATE TABLE evaluation (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -122,7 +123,7 @@ def register():
             conn.commit()
             flash("Compte créé avec succès. Veuillez vous connecter.", "success")
             return redirect(url_for('index'))
-        except sqlite3.IntegrityError: # ici on dit que on n'eesaye pas de rajouter un utilisateur deja existant
+        except sqlite3.IntegrityError: # ici on attrape l'exception de l'utilisateur déjà crée
             flash("Nom d'utilisateur ou email déjà existant.", "danger")
         finally:
             conn.close()
@@ -242,7 +243,7 @@ def add_etagere():
     flash("Étagère ajoutée avec succès.", "success")
     return redirect(url_for('dashboard'))
 
-# formulaire de suspression d'une étagère
+# formulaire de supression d'une étagère
 @app.route('/etagere/delete/<int:etagere_id>', methods=['POST'])
 def delete_etagere(etagere_id):
     if 'user_id' not in session:

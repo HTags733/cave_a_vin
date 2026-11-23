@@ -1,0 +1,55 @@
+@startuml Cas d'utilisation
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Utilisateur" as U
+
+rectangle "Application MaCave (Flask)" {
+  usecase "S'inscrire (création auto. de la cave)" as UC_Reg
+  usecase "S'authentifier" as UC_Auth
+  usecase "Se déconnecter" as UC_Logout
+  
+  usecase "Consulter le tableau de bord (KPIs)" as UC_Dash
+  usecase "Ajouter une étagère" as UC_AddEtag
+  usecase "Supprimer une étagère vide" as UC_DelEtag
+  
+  usecase "Consulter le catalogue global" as UC_Cat
+  usecase "Ajouter des bouteilles en stock" as UC_AddBout
+  usecase "Créer une référence de vin" as UC_NewVin
+  
+  usecase "Gérer son stock" as UC_Stock
+  usecase "Déplacer une bouteille" as UC_MoveBout
+  usecase "Retirer définitivement une bouteille" as UC_RemBout
+  usecase "Archiver une bouteille (consommée)" as UC_ArchBout
+  usecase "Évaluer le vin" as UC_Eval
+  
+  usecase "Consulter son historique d'archives" as UC_Hist
+  usecase "Consulter les avis de la communauté" as UC_Comm
+  usecase "Supprimer son propre avis" as UC_DelEval
+}
+
+U --> UC_Reg
+U --> UC_Auth
+U --> UC_Logout
+
+U --> UC_Dash
+U --> UC_AddEtag
+U --> UC_DelEtag
+U --> UC_Cat
+U --> UC_AddBout
+U --> UC_Stock
+U --> UC_Hist
+U --> UC_Comm
+U --> UC_DelEval
+
+' Relations d'inclusion et d'extension
+UC_AddBout ..> UC_NewVin : <<extend>>\n(si référence inexistante)
+UC_ArchBout ..> UC_Eval : <<include>>\n(obligatoire)
+UC_Comm ..> UC_Eval : <<extend>>\n(avis direct sans bouteille)
+
+note right of UC_Auth
+  Prérequis (session['user_id']) 
+  pour tous les cas d'utilisation 
+  hormis l'inscription et la connexion.
+end note
+@enduml

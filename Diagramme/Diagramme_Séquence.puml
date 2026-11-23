@@ -1,0 +1,43 @@
+@startuml Diagramme de Séquence
+autonumber
+actor "Utilisateur" as U
+participant "Navigateur\n(catalog.html)" as View
+participant "Contrôleur Flask\n(/vin/add)" as Ctrl
+database "SQLite\n(macave.db)" as DB
+
+U -> View : Soumet le formulaire d'ajout\n(infos vin, etagere_id, quantite, prix)
+View -> Ctrl : POST /vin/add
+
+alt Session invalide ('user_id' absent)
+    Ctrl --> View : Redirect('/')
+else Session valide
+    Ctrl -> Ctrl : Valide quantite > 0 et prix_achat >= 0
+    alt Paramètres invalides
+        Ctrl --> View : flash("Quantité et prix invalides")\nRedirect('/catalog')
+    else Paramètres valides
+        Ctrl -> DB : SELECT capacite, COUNT(*) as occup\nFROM etagere / bouteille WHERE id = etagere_id
+        DB --> Ctrl : etot (capacite, occup)
+        
+        alt etot.occup + quantite > etot.capacite
+            Ctrl --> View : flash("Capacité insuffisante")\nRedirect('/catalog')
+        else Capacité suffisante
+            Ctrl -> DB : SELECT id FROM vin_ref\nWHERE domaine, nom, type, millesime, region
+            DB --> Ctrl : vin (ou None)
+            
+            alt Référence vin existante
+                Ctrl -> Ctrl : vin_id = vin['id']
+            else Nouvelle référence
+                Ctrl -> DB : INSERT INTO vin_ref (...)
+                DB --> Ctrl : vin_id = lastrowid
+            end
+            
+            loop quantite fois
+                Ctrl -> DB : INSERT INTO bouteille\n(vin_id, etagere_id, prix_achat, date_ajout, 'stock')
+            end
+            
+            Ctrl -> DB : COMMIT
+            Ctrl --> View : flash("X bouteille(s) ajoutée(s)")\nRedirect('/catalog')
+        end
+    end
+end
+@enduml

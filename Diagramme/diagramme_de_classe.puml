@@ -1,0 +1,77 @@
+@startuml Diagramme de Classe
+skinparam classAttributeIconSize 0
+
+class Utilisateur {
+  - id : int
+  - username : str
+  - email : str
+  - password_hash : str
+  + register(username: str, email: str, pwd: str) : bool
+  + login(username: str, pwd: str) : bool
+  + logout() : void
+}
+
+class Cave {
+  - id : int
+  - utilisateur_id : int
+  + getStats() : dict
+  + getCapaciteTotale() : int
+  + getValeurStock() : float
+}
+
+class Etagere {
+  - id : int
+  - nom : str
+  - capacite : int
+  - cave_id : int
+  + getOccupation() : int
+  + verifierPlaceDisponible(qte: int) : bool
+  + estVide() : bool
+}
+
+class VinRef {
+  - id : int
+  - domaine : str
+  - nom : str
+  - type : str
+  - millesime : int
+  - region : str
+  - description : str
+  + getNoteMoyenne() : float
+  + getNombreEvaluations() : int
+}
+
+class Bouteille {
+  - id : int
+  - vin_id : int
+  - etagere_id : int
+  - prix_achat : float
+  - date_ajout : str
+  - statut : str {stock, archive}
+  + deplacer(nouvelle_etagere_id: int) : bool
+  + archiver() : void
+  + retirer() : void
+}
+
+class Evaluation {
+  - id : int
+  - note : int
+  - commentaire : str
+  - auteur_id : int
+  - vin_id : int
+  - bouteille_id : int [0..1]
+  + validerNote(note: int) : bool
+  + supprimer(user_id: int) : bool
+}
+
+' Relations et Multiplicités
+Utilisateur "1" *-- "1" Cave : possède >
+Cave "1" *-- "0..*" Etagere : est composée de >
+Etagere "1" o-- "0..*" Bouteille : stocke >
+VinRef "1" -- "0..*" Bouteille : référence >
+
+Utilisateur "1" -- "0..*" Evaluation : rédige >
+VinRef "1" -- "0..*" Evaluation : concerne >
+Bouteille "0..1" -- "0..1" Evaluation : donne lieu à >
+
+@enduml
